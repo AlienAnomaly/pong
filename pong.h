@@ -42,6 +42,17 @@ void run_game(Game* game);
 ///////////////////////////////////////////////////////////////////////
 
 typedef struct {
+  float x, y;
+} Vec2;
+
+Vec2 construct_vec2(float x, float y);
+Vec2 add_vec2(const Vec2 v1, const Vec2 v2);
+Vec2 sub_vec2(const Vec2 v1, const Vec2 v2);
+Vec2 mul_vec2(const Vec2 v1, const Vec2 v2);
+
+///////////////////////////////////////////////////////////////////////
+
+typedef struct {
   SDL_Texture* handle;
   SDL_FRect transform;
   bool initted;
@@ -49,3 +60,14 @@ typedef struct {
 
 bool init_texture(Texture* tex, Game* game, const char* path);
 void free_texture(Texture* tex);
+
+
+///////////////////////////////////////////////////////////////////////
+
+typedef struct {
+  Texture asset;
+  bool initted;
+} Paddle;
+
+bool init_paddle(Paddle* paddle, Game* game, const char* title, Vec2 position);
+void free_paddle(Paddle* paddle);

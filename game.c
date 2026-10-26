@@ -1,5 +1,11 @@
 #include "pong.h"
 
+#define DEFAULT_PADDLE_SPEED 0.1f
+
+static Paddle paddle1 = {0};
+static Paddle paddle2 = {0};
+// static Ball ball = {0};
+
 static void poll_events(Game* game) {
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
@@ -12,12 +18,25 @@ static void poll_events(Game* game) {
 }
 
 static void update(Game* game) {
-  
+  const bool* keys = SDL_GetKeyboardState(NULL);
+
+  if (paddle1.asset.transform.y > 0.0f && keys[SDL_SCANCODE_W]) {
+    paddle1.asset.transform.y -= DEFAULT_PADDLE_SPEED;
+  }
+
+  if (paddle1.asset.transform.y < 600.0f - paddle1.asset.transform.h && keys[SDL_SCANCODE_S]) {
+    paddle1.asset.transform.y += DEFAULT_PADDLE_SPEED;
+  }
 }
 
 static void render(Game* game) {
   SDL_SetRenderDrawColor(game->ren->handle, 20, 20, 20, 255);
   SDL_RenderClear(game->ren->handle);
+
+  // render the player paddles.
+  SDL_RenderTexture(game->ren->handle, paddle1.asset.handle, NULL, &paddle1.asset.transform);
+  //  SDL_RenderTexture(game->ren->handle, paddle2.asset.handle, NULL, NULL);
+  
   SDL_RenderPresent(game->ren->handle);
 }
 
@@ -31,6 +50,14 @@ bool init_game(Game* game, Window* win, Renderer* ren) {
   game->initted = true;
 
   if (!game->win || !game->ren) return false;
+
+  init_paddle(&paddle1, game, "assets/test/paddle.png", (Vec2){0.0f, 0.0f});
+  paddle1.asset.transform.x = 100.0f;
+  paddle1.asset.transform.y = (win->height / 2) - (paddle1.asset.handle->h / 2);
+  paddle1.asset.transform.w = paddle1.asset.handle->w;
+  paddle1.asset.transform.h = paddle1.asset.handle->h;
+  
+  init_paddle(&paddle2, game, "assets/test/paddle.png", (Vec2){0.0f, 0.0f});
 
   return true;
 }
