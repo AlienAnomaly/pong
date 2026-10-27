@@ -57,6 +57,30 @@ static void update(Game* game) {
   } else if (paddle1.asset.transform.y > game->win->height) {
     paddle1.asset.transform.y = game->win->height - paddle1.asset.transform.h;
   }
+
+  if (ball.asset.transform.x > game->win->width) {
+    flip_h = true;
+  } else if (ball.asset.transform.x < 0) {
+    flip_h = false;
+  }
+
+  if (ball.asset.transform.y > game->win->height) {
+    flip_v = true;
+  } else if (ball.asset.transform.y < 0) {
+    flip_v = false;
+  }
+
+  if (!flip_h) {
+    ball.asset.transform.x += DEFAULT_PADDLE_SPEED;
+  } else if (flip_h) {
+    ball.asset.transform.x -= DEFAULT_PADDLE_SPEED;
+  }
+
+  if (!flip_v) {
+    ball.asset.transform.y += DEFAULT_PADDLE_SPEED;
+  } else if (flip_v) {
+    ball.asset.transform.y -= DEFAULT_PADDLE_SPEED;
+  }
 }
 
 static void render(Game* game) {
