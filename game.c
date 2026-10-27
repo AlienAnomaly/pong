@@ -61,6 +61,7 @@ bool init_game(Game* game, Window* win, Renderer* ren) {
 
   if (!game->win || !game->ren) return false;
 
+  // INIT GAME OBJECTS
   init_paddle(&paddle1, game, "assets/test/paddle.png", (Vec2){0.0f, 0.0f});
   paddle1.asset.transform.x = 100.0f;
   paddle1.asset.transform.y = (win->height / 2) - (paddle1.asset.handle->h / 2);
