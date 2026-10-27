@@ -22,6 +22,9 @@
 
 static Paddle paddle1 = {0};
 static Paddle paddle2 = {0};
+
+static bool flip_h = false;
+static bool flip_v = false;
 static Ball ball = {0};
 
 static void poll_events(Game* game) {
@@ -60,7 +63,7 @@ static void render(Game* game) {
   SDL_SetRenderDrawColor(game->ren->handle, 20, 20, 20, 255);
   SDL_RenderClear(game->ren->handle);
 
-  // render the player paddles.
+  // render the player paddles and the ball.
   SDL_RenderTexture(game->ren->handle, paddle1.asset.handle, NULL, &paddle1.asset.transform);
   SDL_RenderTexture(game->ren->handle, paddle1.asset.handle, NULL, &paddle2.asset.transform);
   SDL_RenderTexture(game->ren->handle, ball.asset.handle, NULL, &ball.asset.transform);
