@@ -1,10 +1,10 @@
 #include "pong.h"
 
-#define DEFAULT_PADDLE_SPEED 0.1f
+#define DEFAULT_PADDLE_SPEED 0.055f
 
 static Paddle paddle1 = {0};
 static Paddle paddle2 = {0};
-// static Ball ball = {0};
+static Ball ball = {0};
 
 static void poll_events(Game* game) {
   SDL_Event event;
@@ -12,6 +12,11 @@ static void poll_events(Game* game) {
     switch (event.type) {
       case SDL_EVENT_QUIT: {
         game->running = false;
+      } break;
+
+      case SDL_EVENT_WINDOW_RESIZED: {
+        game->win->width = event.window.data1;
+        game->win->height = event.window.data2;
       } break;
     }
   }
@@ -22,10 +27,14 @@ static void update(Game* game) {
 
   if (paddle1.asset.transform.y > 0.0f && keys[SDL_SCANCODE_W]) {
     paddle1.asset.transform.y -= DEFAULT_PADDLE_SPEED;
+  } else if (paddle1.asset.transform.y < 0) {
+    paddle1.asset.transform.y = 0.0f;
   }
 
-  if (paddle1.asset.transform.y < 600.0f - paddle1.asset.transform.h && keys[SDL_SCANCODE_S]) {
+  if (paddle1.asset.transform.y < game->win->height - paddle1.asset.transform.h && keys[SDL_SCANCODE_S]) {
     paddle1.asset.transform.y += DEFAULT_PADDLE_SPEED;
+  } else if (paddle1.asset.transform.y > game->win->height) {
+    paddle1.asset.transform.y = game->win->height - paddle1.asset.transform.h;
   }
 }
 
@@ -35,8 +44,9 @@ static void render(Game* game) {
 
   // render the player paddles.
   SDL_RenderTexture(game->ren->handle, paddle1.asset.handle, NULL, &paddle1.asset.transform);
-  //  SDL_RenderTexture(game->ren->handle, paddle2.asset.handle, NULL, NULL);
-  
+  SDL_RenderTexture(game->ren->handle, paddle1.asset.handle, NULL, &paddle2.asset.transform);
+  SDL_RenderTexture(game->ren->handle, ball.asset.handle, NULL, &ball.asset.transform);
+
   SDL_RenderPresent(game->ren->handle);
 }
 
@@ -58,7 +68,15 @@ bool init_game(Game* game, Window* win, Renderer* ren) {
   paddle1.asset.transform.h = paddle1.asset.handle->h;
   
   init_paddle(&paddle2, game, "assets/test/paddle.png", (Vec2){0.0f, 0.0f});
+  paddle2.asset.transform.x = (game->win->width - 100.0f) - (paddle2.asset.transform.w / 2);
+  paddle2.asset.transform.y = (win->height / 2) - (paddle2.asset.handle->h / 2);
+  paddle2.asset.transform.w = paddle2.asset.handle->w;
+  paddle2.asset.transform.h = paddle2.asset.handle->h;
 
+  init_ball(&ball, game, "assets/test/ball.png", (Vec2){0.0f, 0.0f});
+  ball.asset.transform.x = game->win->width / 2 - ball.asset.transform.w / 2;
+  ball.asset.transform.y = game->win->height / 2 - ball.asset.transform.h / 2;
+  
   return true;
 }
 

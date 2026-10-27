@@ -69,5 +69,13 @@ typedef struct {
   bool initted;
 } Paddle;
 
-bool init_paddle(Paddle* paddle, Game* game, const char* title, Vec2 position);
+bool init_paddle(Paddle* paddle, Game* game, const char* asset_path, Vec2 position);
 void free_paddle(Paddle* paddle);
+
+typedef struct {
+  Texture asset;
+  bool initted;
+} Ball;
+
+bool init_ball(Ball* ball, Game* game, const char* asset_path, Vec2 position);
+void free_ball(Ball* ball);
