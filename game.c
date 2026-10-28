@@ -19,6 +19,9 @@
 #include "pong.h"
 
 #define DEFAULT_PADDLE_SPEED 0.055f
+#define DEFAULT_BALL_SPEED 0.055f
+#define BALL_WIDTH 16
+#define BALL_HEIGHT 16
 
 static Paddle paddle1 = {0};
 static Paddle paddle2 = {0};
@@ -26,6 +29,13 @@ static Paddle paddle2 = {0};
 static bool flip_h = false;
 static bool flip_v = false;
 static Ball ball = {0};
+
+static bool check_collision(SDL_FRect r1, SDL_FRect r2) {
+  return (r1.x < r2.x + r2.w &&
+          r1.x + r1.w > r2.x &&
+          r1.y < r2.y + r2.h &&
+          r1.y + r1.h > r2.y);
+}
 
 static void poll_events(Game* game) {
   SDL_Event event;
@@ -46,6 +56,7 @@ static void poll_events(Game* game) {
 static void update(Game* game) {
   const bool* keys = SDL_GetKeyboardState(NULL);
 
+  // Paddle 1 movement...
   if (paddle1.asset.transform.y > 0.0f && keys[SDL_SCANCODE_W]) {
     paddle1.asset.transform.y -= DEFAULT_PADDLE_SPEED;
   } else if (paddle1.asset.transform.y < 0) {
@@ -58,28 +69,60 @@ static void update(Game* game) {
     paddle1.asset.transform.y = game->win->height - paddle1.asset.transform.h;
   }
 
-  if (ball.asset.transform.x > game->win->width) {
+  // Paddle 2 movement...
+  if (paddle2.asset.transform.y > 0.0f && keys[SDL_SCANCODE_UP]) {
+    paddle2.asset.transform.y -= DEFAULT_PADDLE_SPEED;
+  } else if (paddle2.asset.transform.y < 0) {
+    paddle2.asset.transform.y = 0.0f;
+  }
+
+  if (paddle2.asset.transform.y < game->win->height - paddle2.asset.transform.h && keys[SDL_SCANCODE_DOWN]) {
+    paddle2.asset.transform.y += DEFAULT_PADDLE_SPEED;
+  } else if (paddle2.asset.transform.y > game->win->height) {
+    paddle2.asset.transform.y = game->win->height - paddle2.asset.transform.h;
+  }
+
+  // 1. Left/Right Window Bounds (Score / Reset or simple bounce)
+  if (ball.asset.transform.x > game->win->width - ball.asset.transform.w) {
     flip_h = true;
   } else if (ball.asset.transform.x < 0) {
     flip_h = false;
   }
 
-  if (ball.asset.transform.y > game->win->height) {
+  // 2. Top/Bottom Window Bounds (Bounce V)
+  if (ball.asset.transform.y > game->win->height - ball.asset.transform.h) {
     flip_v = true;
   } else if (ball.asset.transform.y < 0) {
     flip_v = false;
   }
 
+  // 3. Paddle 1 Collision
+  if (check_collision(ball.asset.transform, paddle1.asset.transform)) {
+    if (flip_h) {
+      flip_h = false;
+      ball.asset.transform.x = paddle1.asset.transform.x + paddle1.asset.transform.w;
+    }
+  }
+
+  // 4. Paddle 2 Collision
+  if (check_collision(ball.asset.transform, paddle2.asset.transform)) {
+    if (!flip_h) {
+      flip_h = true;
+      ball.asset.transform.x = paddle2.asset.transform.x - ball.asset.transform.w;
+    }
+  }
+
+  // Apply Ball Movement
   if (!flip_h) {
-    ball.asset.transform.x += DEFAULT_PADDLE_SPEED;
-  } else if (flip_h) {
-    ball.asset.transform.x -= DEFAULT_PADDLE_SPEED;
+    ball.asset.transform.x += DEFAULT_BALL_SPEED;
+  } else {
+    ball.asset.transform.x -= DEFAULT_BALL_SPEED;
   }
 
   if (!flip_v) {
-    ball.asset.transform.y += DEFAULT_PADDLE_SPEED;
-  } else if (flip_v) {
-    ball.asset.transform.y -= DEFAULT_PADDLE_SPEED;
+    ball.asset.transform.y += DEFAULT_BALL_SPEED;
+  } else {
+    ball.asset.transform.y -= DEFAULT_BALL_SPEED;
   }
 }
 
